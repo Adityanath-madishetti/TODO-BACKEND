@@ -134,7 +134,7 @@ func ChangeTitle(taskID string, newtitle  string) error{
 	_, err :=db.Taskcollection.UpdateOne(context.Background(),filter,update)
 	
 		if(err!=nil){
-			fmt.Println("error in updating from changeTitle %w",err)
+			return fmt.Errorf("error in updating from changeTitle %w",err)
 		}
 
 
@@ -161,11 +161,34 @@ func ChangeCategory(taskID string, newcategory  string) error{
 	_, err :=db.Taskcollection.UpdateOne(context.Background(),filter,update)
 	
 		if(err!=nil){
-			fmt.Println("error in updating from changeTitle %w",err)
+			return fmt.Errorf("error in updating from changeTitle %w",err)
+
 		}
 
 		return nil
 
+}
+
+
+
+func ChangePriority(taskID string, newpriority int) error{
+	update:= bson.M{
+		"set":bson.M{
+			"priority":newpriority,
+		},
+	}
+
+	filter:=bson.M{
+		"taskId":taskID,
+	}
+
+	_, err :=db.Taskcollection.UpdateOne(context.Background(),filter,update)
+
+	if(err!=nil){
+			return fmt.Errorf("error in updating from changeTitle %w",err)
+	}
+
+		return nil
 }
 
 
@@ -274,9 +297,6 @@ func GeneralFilter(filter bson.M)([]Task,error){
 	if err := curr.Err(); err != nil {
 		return nil, fmt.Errorf("GeneralFilter: cursor error: %w", err)
 	}
-
+	
 	return tasks,nil
-
-
-
 }

@@ -10,6 +10,7 @@ import (
 	"github.com/adityanath-madishetti/todo/backend/utils"
 	"github.com/google/uuid"
 	"go.mongodb.org/mongo-driver/v2/bson"
+	"go.mongodb.org/mongo-driver/v2/mongo"
 )
 
 
@@ -31,6 +32,7 @@ type User struct {
 // ----------------------------------	VARS 	-----------------------------------
 
 var ErrUserExists = errors.New("user already exists")
+var ErrNouserExists=errors.New("no new user with this detaisl exist")
 
 // --------------------------------------------------------------------------------
 
@@ -45,7 +47,7 @@ func CreateUser(newuser User) error {
 	val, _ := utils.IsUserNameTaken(newuser.Name)
 
 	if val {
-		return errors.New("username already taken")
+		return fmt.Errorf("CreateUser: %w", ErrUserExists)
 	}
 
 
@@ -67,13 +69,106 @@ func CreateUser(newuser User) error {
 
 
 
+// not needed much cause its checked directly afetr fetching user
+func CheckUserPresence(hashedPassword string, username string) (bool, error) {
+	count, err := db.UserCollection.CountDocuments(context.Background(), bson.M{
+		"name":     username,
+		"password": hashedPassword,
+	})
+
+	if(errors.Is(err,mongo.ErrNoDocuments)){
+		return false, fmt.Errorf("CheckUserPresence %w",ErrNouserExists)
+	}
+	if err != nil {
+		return false, fmt.Errorf("CheckUserPresence: %w", err)
+	}
+	return count == 1, nil
+}
+
+func GetUserObject(userID string) (User, error) {
+	var user User
+
+	err := db.UserCollection.FindOne(context.Background(), bson.M{"userId": userID}).Decode(&user)
+	if err != nil {
+		return user, fmt.Errorf("GetUserObject: %w", err)
+	}
+
+	return user, nil
+}
+
+
+func GetUserFromUsername(userName string) (User,error){
+	var user User
+
+	err := db.UserCollection.FindOne(context.Background(), bson.M{"name": userName}).Decode(&user)
+	if err != nil {
+		return user, fmt.Errorf("GetUserObject: %w", err)
+	}
+
+	return user, nil
+}
+
+
+
+func GetUserFromUserId(userid string) (User,error){
+	var user User
+
+	err := db.UserCollection.FindOne(context.Background(), bson.M{"userId": userid}).Decode(&user)
+	if err != nil {
+		return user, fmt.Errorf("GetUserObject: %w", err)
+	}
+
+	return user, nil
+}
+
+
+
+func UpdateLastLoginTime(username string)error{
+
+
+
+	now := time.Now()
+	res,err:=db.UserCollection.UpdateOne(context.Background(),bson.M{"name":username},bson.M{
+		"$set":bson.M{
+			"lastLogin":&now,
+		},
+	})
+
+	if(err!=nil){
+		return fmt.Errorf("error from UpdateLastLogin, %w",err)
+	}
+
+	fmt.Println("info regarding update (Mc, U)c is : ",res.MatchedCount,res.ModifiedCount)
+
+	return nil
+
+}
 
 
 
 
+func UpdatePassword(userId string, newPasswordHash string) error {
+	res, err := db.UserCollection.UpdateOne(
+		context.Background(),
+		bson.M{"userId": userId},
+		bson.M{"$set": bson.M{"password": newPasswordHash}},
+	)
+	if err != nil {
+		return fmt.Errorf("error from UpdatePassword model: %w", err)
+	}
 
+	if res.MatchedCount == 0 {
+		return fmt.Errorf("no user found with userId %s", userId)
+	}
 
+	if res.ModifiedCount == 0 {
+		fmt.Println("Password was already the same; nothing updated")
+	} else {
+		fmt.Println("Password updated successfully")
+	}
 
+	return nil
+}
 
 
 

@@ -2,7 +2,9 @@ package utils
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
+	"net/http"
 
 	db "github.com/adityanath-madishetti/todo/backend/DB"
 	"go.mongodb.org/mongo-driver/v2/bson"
@@ -57,4 +59,13 @@ func IsUserNameTaken(name string) (bool, error) {
         return false, err
     }
     return count > 0, nil
+}
+
+
+func SendJSONError(w http.ResponseWriter, status int, message string) {
+    w.Header().Set("Content-Type", "application/json")
+    w.WriteHeader(status)
+    json.NewEncoder(w).Encode(map[string]string{
+        "message": message,
+    })
 }
