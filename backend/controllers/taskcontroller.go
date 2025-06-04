@@ -7,6 +7,7 @@ import (
 	"github.com/adityanath-madishetti/todo/backend/middleware"
 	model "github.com/adityanath-madishetti/todo/backend/models"
 	"github.com/adityanath-madishetti/todo/backend/utils"
+	"github.com/gorilla/mux"
 )
 
 // update sany thing
@@ -40,7 +41,7 @@ type UpdateRequest struct {
 
 
 // depends on taskId so userId dosent matter
-func UpdateTaskController(w http.ResponseWriter, r *http.Response){
+func UpdateTaskController(w http.ResponseWriter, r *http.Request){
 
 
 
@@ -257,7 +258,48 @@ func GetTasksForUser(w http.ResponseWriter,r *http.Request){
 
 
 // this function uses userId from token
-func GetTasksByCategory(w http.ResponseWriter,r *http.Request){
+func GetTasksByCategory(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+
+	// Get the category from the URL path
+	vars := mux.Vars(r)
+	category, ok := vars["category"]
+	if !ok || category == "" {
+		utils.SendJSONError(w, http.StatusBadRequest, "Missing or empty category in URL")
+		return
+	}
+
+	// Get userId from context (from middleware)
+	userId, ok := r.Context().Value(middleware.ContextKeyUserID).(string)
+	if !ok || userId == "" {
+		utils.SendJSONError(w, http.StatusBadRequest, "Invalid or missing user ID")
+		return
+	}
+
+	// Fetch tasks for user by category
+	tasks, err := model.GetTasksByCategoryForUser(category, userId)
+	if err != nil {
+		utils.SendJSONError(w, http.StatusInternalServerError, "Error from GetTasksByCategory: "+err.Error())
+		return
+	}
+
+	// Return tasks
+	json.NewEncoder(w).Encode(map[string]interface{}{
+		"tasks":   tasks,
+		"message": "successful",
+	})
+}
+
+
+
+
+//add a task and remove a task controllers
+
+func AddTaskcontroller(w http.ResponseWriter,r * http.Request){
+
+	// just adds a task
+
+
 	w.Header().Set("Content-Type", "application/json")
 
 
@@ -267,57 +309,75 @@ func GetTasksByCategory(w http.ResponseWriter,r *http.Request){
         return
     }
 
+	userId,ok:=r.Context().Value(middleware.ContextKeyUserID).(string)
 
-	var body map[string]interface{}
-
-	if err:=json.NewDecoder(r.Body).Decode(&body);err!=nil{
-		utils.SendJSONError(w,http.StatusBadRequest,"Invalid json;: "+err.Error())
-		return
-	}
-
-
-	category, ok :=body["category"].(string)
-	if(!ok){
-		utils.SendJSONError(w,http.StatusUnprocessableEntity,"category should be string")
-		return
-	}
-
-
-	if(category==""){
-		utils.SendJSONError(w,http.StatusBadRequest,"category should be string")
-		return
-	}
-	userId, ok :=r.Context().Value(middleware.ContextKeyUserID).(string)
 
 	if(!ok){
-		utils.SendJSONError(w,http.StatusUnprocessableEntity,"userId should be string")
+		utils.SendJSONError(w,http.StatusUnprocessableEntity,"UserId should be string so problem with token")
 		return
 	}
-
-
 
 	if(userId==""){
-		utils.SendJSONError(w,http.StatusBadRequest,"userId should be string,some problem with string")
+		utils.SendJSONError(w,http.StatusBadRequest,"userId should be string so problem with token")
+				return
+	}
+
+	var newtask model.Task
+
+	//first decide how  request is sent
+
+	type taskrequest struct{
+		Category string `json:"category"`
+		Title string 	`json:"title"`
+		Priority int `json:"priority"`
+	}
+
+	var reqbody taskrequest
+	if err:=json.NewDecoder(r.Body).Decode(&reqbody);err!=nil{
+		utils.SendJSONError(w,http.StatusBadRequest,"Invalid json object given")
 		return
 	}
 
+	newtask.Category=reqbody.Category
+	newtask.Title=reqbody.Title
+	newtask.Priority=reqbody.Priority
+	newtask.UserId=userId
+	newtask.Completed=false
 
-
-
-
-	var tasks []model.Task
-	tasks,err:=model.GetTasksByCategoryForUser(category,userId)
-
-	if err!=nil{
-			utils.SendJSONError(w,http.StatusInternalServerError,"error fro, GetTaskByCategory : "+err.Error())
-			return
+	if	err:=model.CreateTask(newtask);err!=nil{
+		utils.SendJSONError(w,http.StatusInternalServerError,"error from AddTaskcontroller: "+err.Error())
+		return
 	}
 
-	json.NewEncoder(w).Encode(map[string]interface{}{"tasks":tasks,"message":"succesful"})
+	json.NewEncoder(w).Encode(map[string]interface{}{"message":"succesfully done"})
+
 
 }
 
 
+func RemoveController(w http.ResponseWriter,r * http.Request){
+	w.Header().Set("Content-Type", "application/json")
 
-//add a task and remove a task controllers
 
+    
+
+	vars:=mux.Vars(r)
+	taskid:=vars["id"]
+
+
+	if taskid == "" {
+    utils.SendJSONError(w, http.StatusBadRequest, "Missing task ID in URL")
+    return
+	}
+
+	if err:=model.RemoveTask(taskid);err!=nil{
+		utils.SendJSONError(w,http.StatusInternalServerError,"error from AddTaskcontroller: "+err.Error())
+		return
+	}
+
+	json.NewEncoder(w).Encode(map[string]interface{}{"message":"succesfully done"})
+
+
+}
+
+ 

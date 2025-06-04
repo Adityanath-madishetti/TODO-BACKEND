@@ -32,7 +32,7 @@ type Task struct {
 
 
 
-// user id is given to you in task struct automatically so jsut handel times and id remaining is hoped to eb done by controller
+// user id is given to you in task struct automatically so jsut handel times and id remaining is hoped to be done by controller
 func CreateTask(newtask Task ) error{
 
 	if newtask.Id.IsZero(){
@@ -43,6 +43,7 @@ func CreateTask(newtask Task ) error{
 	newtask.TaskId = uuid.New().String()
 	newtask.CreationTime = time.Now()
 	newtask.CompletionTime=nil
+	newtask.Completed=false
 
 
 	res,err:=db.Taskcollection.InsertOne(context.Background(),newtask)
@@ -297,6 +298,6 @@ func GeneralFilter(filter bson.M)([]Task,error){
 	if err := curr.Err(); err != nil {
 		return nil, fmt.Errorf("GeneralFilter: cursor error: %w", err)
 	}
-	
+
 	return tasks,nil
 }

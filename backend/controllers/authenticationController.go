@@ -28,7 +28,7 @@ type SignInRequest struct {
 
 // the body should only contain  username  and password as json fields
 
-func SignInController(w http.ResponseWriter, r *http.Request) {
+func SignUpController(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 
@@ -37,6 +37,8 @@ func SignInController(w http.ResponseWriter, r *http.Request) {
         utils.SendJSONError(w,http.StatusUnsupportedMediaType, "Content-Type must be application/json")
         return
     }
+
+	// fmt.Println(r.Header.Get("Content-Type"))
 
 
 
@@ -94,7 +96,7 @@ func SignInController(w http.ResponseWriter, r *http.Request) {
 // actual logic of comparing teh passwor dis pending
 
 
-func LoginController(w http.ResponseWriter,r http.Request){
+func LoginController(w http.ResponseWriter,r *http.Request){
 
 	w.Header().Set("Content-Type", "application/json")
 
