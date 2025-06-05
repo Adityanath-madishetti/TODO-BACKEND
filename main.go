@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	db "github.com/adityanath-madishetti/todo/backend/DB"
+	controller "github.com/adityanath-madishetti/todo/backend/controllers"
 	"github.com/adityanath-madishetti/todo/backend/routes"
 	"github.com/gorilla/mux"
 	"github.com/joho/godotenv"
@@ -27,6 +28,7 @@ func main(){
 
 
 		r:=mux.NewRouter()
+	r.NotFoundHandler = http.HandlerFunc(controller.NotFoundHandler)
 		sr2:=r.PathPrefix("/internals").Subrouter()
 		sr:=r.PathPrefix("/api").Subrouter()
 		routes.AuthRoutes(sr)
