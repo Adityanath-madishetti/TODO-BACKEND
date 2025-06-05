@@ -5,11 +5,13 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"os"
 	"time"
-	"golang.org/x/crypto/bcrypt"
+
 	model "github.com/adityanath-madishetti/todo/backend/models"
 	"github.com/adityanath-madishetti/todo/backend/utils"
 	"github.com/golang-jwt/jwt/v5"
+	"golang.org/x/crypto/bcrypt"
 )
 
 // authentocation controller
@@ -174,7 +176,7 @@ func LoginController(w http.ResponseWriter,r *http.Request){
 
 	tokenGenerated:=jwt.NewWithClaims(jwt.SigningMethodHS256,claims)
 
-	tokenString,err:=tokenGenerated.SignedString([]byte("Aditya@5002"))
+	tokenString,err:=tokenGenerated.SignedString([]byte(os.Getenv("secret_key")))
 
 	if(err!=nil){
 		//handel http error 

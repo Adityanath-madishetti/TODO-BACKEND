@@ -8,13 +8,23 @@ import (
 	db "github.com/adityanath-madishetti/todo/backend/DB"
 	"github.com/adityanath-madishetti/todo/backend/routes"
 	"github.com/gorilla/mux"
+	"github.com/joho/godotenv"
+	"github.com/rs/cors"
 )
 
-
+func init() {
+    err := godotenv.Load()
+    if err != nil {
+        log.Fatal("Error loading .env file")
+    }
+}
 
 func main(){
 		fmt.Println("Welcome to MongoDB-based API")
 		db.MakeDbConnection()
+
+
+
 
 		r:=mux.NewRouter()
 		sr2:=r.PathPrefix("/internals").Subrouter()
@@ -24,10 +34,15 @@ func main(){
 		routes.Userroutes(sr)
 		routes.Internaluserroutes(sr2)
 		
+
+				handler := cors.New(cors.Options{
+    AllowedOrigins: []string{"http://localhost:3000"},
+    AllowedMethods: []string{"GET", "POST", "PUT", "DELETE"},
+}).Handler(r)
 		
 
     log.Println("Server running on :8080")
-	http.ListenAndServe(":8080", r)
+	http.ListenAndServe(":8080", handler)
 
 
 }

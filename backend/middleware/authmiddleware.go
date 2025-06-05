@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"os"
 	"strings"
 
 	"github.com/adityanath-madishetti/todo/backend/utils"
@@ -31,6 +32,11 @@ func AuthenticationMiddleware(next http.Handler) http.Handler{
 
 				//if valid then extract teh payload and give it back
 
+				if(r.Header.Get("Authorization")==""){
+					utils.SendJSONError(w,http.StatusUnauthorized,"unauthorised access")
+					return
+				}
+
 				authHeader:= strings.Split(r.Header.Get("Authorization"),"Bearer ") // it is now basically slice of strings
 
 				
@@ -48,7 +54,7 @@ func AuthenticationMiddleware(next http.Handler) http.Handler{
 																		if token.Method != jwt.SigningMethodHS256 {
     																	return nil, fmt.Errorf("unexpected signing method: %v", token.Method.Alg())
 																		}
-																	return []byte("Aditya@5002"),nil
+																	return []byte(os.Getenv("secret_key")),nil
 				})
 
 				if err != nil || !actualToken.Valid {

@@ -3,6 +3,7 @@ package db
 import (
 	"context"
 	"log"
+	"os"
 	"time"
 
 	"go.mongodb.org/mongo-driver/v2/mongo"
@@ -19,7 +20,8 @@ var Taskcollection *mongo.Collection
 func MakeDbConnection()  *mongo.Client{
 
 
-conenctionString :="mongodb+srv://cs23btech11032:Aditya%405002@cluster0.hxuizul.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
+// conenctionString :="mongodb+srv://cs23btech11032:Aditya%405002@cluster0.hxuizul.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
+conenctionString:=os.Getenv("MONGO_URI")
 	serverAPI := options.ServerAPI(options.ServerAPIVersion1)
 	opts := options.Client().ApplyURI(conenctionString).SetServerAPIOptions(serverAPI)
 
