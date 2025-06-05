@@ -151,7 +151,7 @@ func ChangeCategory(taskID string, newcategory  string) error{
 
 	update := bson.M{
 		"$set":bson.M{
-			"title":newcategory,
+			"category":newcategory,
 		},
 	}
 

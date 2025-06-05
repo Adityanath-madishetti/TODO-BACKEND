@@ -1,9 +1,11 @@
 package controller
 
 import (
+	
 	"encoding/json"
 	"net/http"
 
+	
 	"github.com/adityanath-madishetti/todo/backend/middleware"
 	model "github.com/adityanath-madishetti/todo/backend/models"
 	"github.com/adityanath-madishetti/todo/backend/utils"
@@ -51,4 +53,26 @@ func ChangePassword(w http.ResponseWriter, r *http.Request) {
 	}
 
 	json.NewEncoder(w).Encode(map[string]string{"message": "Password changed successfully"})
+}
+
+
+// below controllers are not for client
+
+
+
+func GetAllUsersController(w http.ResponseWriter, r *http.Request){
+
+
+	w.Header().Set("Content-Type", "application/json")
+
+	users,err:=model.GetAllUsers() 
+
+	if err!=nil{
+		utils.SendJSONError(w,http.StatusInternalServerError,"error from getallusers contyroller : "+err.Error())
+		return
+	}
+
+	json.NewEncoder(w).Encode(map[string]interface{}{"users":users,"message":"succesful"})
+
+
 }

@@ -17,10 +17,14 @@ func main(){
 		db.MakeDbConnection()
 
 		r:=mux.NewRouter()
+		sr2:=r.PathPrefix("/internals").Subrouter()
 		sr:=r.PathPrefix("/api").Subrouter()
 		routes.AuthRoutes(sr)
 		routes.TaskRoutes(sr)
 		routes.Userroutes(sr)
+		routes.Internaluserroutes(sr2)
+		
+		
 
     log.Println("Server running on :8080")
 	http.ListenAndServe(":8080", r)

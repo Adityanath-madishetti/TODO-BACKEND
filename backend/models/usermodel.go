@@ -110,6 +110,36 @@ func GetUserFromUsername(userName string) (User,error){
 
 
 
+
+func GetAllUsers() ([]User,error){
+
+	var users []User
+
+	curr,err:=db.UserCollection.Find(context.Background(),bson.M{})
+
+	if err!=nil{
+		return users,fmt.Errorf("error from Get all users: %w",err)
+	}
+
+	defer curr.Close(context.Background())
+
+	for curr.Next(context.Background()){
+			var user User
+
+		if err:=curr.Decode(&user);err!=nil{
+			return users, fmt.Errorf("error from Get all users: %w",err)
+		}
+
+		users=append(users, user)
+	}
+
+	return users,nil
+
+
+}
+
+
+
 func GetUserFromUserId(userid string) (User,error){
 	var user User
 

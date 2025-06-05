@@ -218,14 +218,6 @@ func GetTasksForUser(w http.ResponseWriter,r *http.Request){
 	w.Header().Set("Content-Type", "application/json")
 
 
-    if r.Header.Get("Content-Type") != "application/json" {
-        // http.Error(w, "Content-Type must be application/json", http.StatusUnsupportedMediaType)
-		utils.SendJSONError(w,http.StatusUnsupportedMediaType, "Content-Type must be application/json")
-        return
-    }
-
-
-
 	
 	
 	userId, ok:=r.Context().Value(middleware.ContextKeyUserID).(string)

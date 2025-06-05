@@ -84,11 +84,3 @@ func AuthenticationMiddleware(next http.Handler) http.Handler{
 )
 }
 
-
-// func loggingMiddleware(next http.Handler) http.Handler{
-// 	return http.HandlerFunc(
-// 		func(w http.ResponseWriter, r *http.Request) {
-// 	log.Println(r.Method, r.URL.Path)
-// 	next.ServeHTTP(w, r)
-// 	})
-// }
