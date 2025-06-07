@@ -2,7 +2,9 @@ package controller
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
+	"strconv"
 
 	"github.com/adityanath-madishetti/todo/backend/middleware"
 	model "github.com/adityanath-madishetti/todo/backend/models"
@@ -173,25 +175,10 @@ func GetTaskFromId(w http.ResponseWriter , r *http.Request){
 
 	w.Header().Set("Content-Type", "application/json")
 
-
-    if r.Header.Get("Content-Type") != "application/json" {
-        // http.Error(w, "Content-Type must be application/json", http.StatusUnsupportedMediaType)
-		utils.SendJSONError(w,http.StatusUnsupportedMediaType, "Content-Type must be application/json")
-        return
-    }
-
-	var body map[string]interface{}
-	if err:=json.NewDecoder(r.Body).Decode(&body);err!=nil{
-		utils.SendJSONError(w,http.StatusBadRequest,"Invalid Json: "+err.Error())
-		return
-	}
-
-	taskId, ok :=body["taskId"].(string)
-
-	if(!ok){
-		utils.SendJSONError(w,http.StatusUnprocessableEntity,"taskId should be string")
-		return
-	}
+	fmt.Println("endpoint got hit from id task controller")
+	mapc:=mux.Vars(r)
+	taskId:=mapc["id"]
+	
 
 	if(taskId==""){
 		utils.SendJSONError(w,http.StatusBadRequest,"taskId should be string")
@@ -379,7 +366,7 @@ func GeneralFiltercontroller(w http.ResponseWriter, r *http.Request) {
 
 
 
-
+	// fmt.Println("from the general Filter")
 
 
 	title := r.URL.Query().Get("title")
@@ -387,13 +374,33 @@ func GeneralFiltercontroller(w http.ResponseWriter, r *http.Request) {
 	category := r.URL.Query().Get("category")
 	completed:=r.URL.Query().Get("status")
 
+	// fmt.Println("priority: ",priority)
+
 	// Create a dynamic BSON filter
 	filter := bson.M{}
 	if title != "" {
 		filter["title"] = title
 	}
 	if priority != "" {
-		filter["priority"] = priority
+		valFloat, err := strconv.ParseFloat(priority, 64)
+		if err != nil {
+			utils.SendJSONError(w, http.StatusBadRequest, "priority must be a number (e.g., 1, 2, 3): "+err.Error())
+			return
+		}
+
+		val := int(valFloat)
+		if valFloat != float64(val) {
+			utils.SendJSONError(w, http.StatusBadRequest, "priority must be a whole number without decimal (e.g., 1, 2, 3)")
+			return
+		}
+
+		if val < 1 || val > 3 {
+			utils.SendJSONError(w, http.StatusBadRequest, "priority must be between 1 and 3")
+			return
+		}
+
+		// fmt.Println("converted priority val is", val)
+		filter["priority"] = val
 	}
 	if category != "" {
 		filter["category"] = category
@@ -409,6 +416,7 @@ func GeneralFiltercontroller(w http.ResponseWriter, r *http.Request) {
 	}
 
 	tasks, err := model.GeneralFilter(filter)
+	// fmt.Println("tasks being returned are ",tasks)
 	if err != nil {
 		utils.SendJSONError(w,  http.StatusInternalServerError,"Failed to fetch tasks")
 		return
