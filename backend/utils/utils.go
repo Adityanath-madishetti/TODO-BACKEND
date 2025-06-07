@@ -14,6 +14,7 @@ import (
 
 
 var allowedFilters = map[string]bool{
+	"title":true,
 	"completed":   true,
 	"category": true,
 	"priority": true,

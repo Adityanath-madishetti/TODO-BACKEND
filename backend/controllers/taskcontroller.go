@@ -8,6 +8,7 @@ import (
 	model "github.com/adityanath-madishetti/todo/backend/models"
 	"github.com/adityanath-madishetti/todo/backend/utils"
 	"github.com/gorilla/mux"
+	"go.mongodb.org/mongo-driver/v2/bson"
 )
 
 // update sany thing
@@ -372,4 +373,47 @@ func RemoveController(w http.ResponseWriter,r * http.Request){
 
 }
 
- 
+
+func GeneralFiltercontroller(w http.ResponseWriter, r *http.Request) {
+	// Parse query parameters (use r.URL.Query().Get("key"))
+
+
+
+
+
+
+	title := r.URL.Query().Get("title")
+	priority := r.URL.Query().Get("priority")
+	category := r.URL.Query().Get("category")
+	completed:=r.URL.Query().Get("status")
+
+	// Create a dynamic BSON filter
+	filter := bson.M{}
+	if title != "" {
+		filter["title"] = title
+	}
+	if priority != "" {
+		filter["priority"] = priority
+	}
+	if category != "" {
+		filter["category"] = category
+	}
+
+	if completed!=""{
+
+		if completed=="true"{
+			filter["completed"]=true
+		}else{
+			filter["completed"]=false
+		}
+	}
+
+	tasks, err := model.GeneralFilter(filter)
+	if err != nil {
+		utils.SendJSONError(w,  http.StatusInternalServerError,"Failed to fetch tasks")
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]interface{}{"message":"succesful","tasks":tasks})
+}

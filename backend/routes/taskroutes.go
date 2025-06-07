@@ -20,6 +20,7 @@ func TaskRoutes(r *mux.Router) {
 	sr.HandleFunc("/{id}",controller.RemoveController).Methods("DELETE") //removetask
 	sr.HandleFunc("/{id}",controller.GetTaskFromId).Methods("GET") // get task by id
 	sr.HandleFunc("/category/{category}",controller.GetTasksByCategory).Methods("GET") //get task by category
+	sr.HandleFunc("/filter",controller.GeneralFiltercontroller).Methods("GET")
 
 
 }
