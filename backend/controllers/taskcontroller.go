@@ -376,8 +376,23 @@ func GeneralFiltercontroller(w http.ResponseWriter, r *http.Request) {
 
 	// fmt.Println("priority: ",priority)
 
+	//add user id
+
+	userId, ok := r.Context().Value(middleware.ContextKeyUserID).(string)
+	if !ok || userId == "" {
+		utils.SendJSONError(w, http.StatusBadRequest, "Invalid or missing user ID")
+		return
+	}
+
+	
+
+
+
+
 	// Create a dynamic BSON filter
 	filter := bson.M{}
+
+	filter["userId"]=userId
 	if title != "" {
 		filter["title"] = title
 	}
