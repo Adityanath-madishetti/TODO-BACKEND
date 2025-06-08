@@ -324,13 +324,24 @@ func AddTaskcontroller(w http.ResponseWriter,r * http.Request){
 	newtask.UserId=userId
 	newtask.Completed=false
 
-	if	err:=model.CreateTask(newtask);err!=nil{
+	var taskIdgenerated string
+	taskIdgenerated,err:=model.CreateTask(newtask);
+	if err!=nil{
 		utils.SendJSONError(w,http.StatusInternalServerError,"error from AddTaskcontroller: "+err.Error())
 		return
 	}
 
-	json.NewEncoder(w).Encode(map[string]interface{}{"message":"succesfully done"})
+	var newcollection model.TaskDescription
+	newcollection.TaskId=taskIdgenerated
+	newcollection.Text=""
+	newcollection.UserId=userId
 
+	if err:=model.CreateDescription(newcollection);err!=nil{
+		utils.SendJSONError(w,http.StatusInternalServerError,"error from createTask: "+err.Error())
+		return
+	}
+
+	json.NewEncoder(w).Encode(map[string]interface{}{"message":"succesfully done"})
 
 }
 
@@ -351,8 +362,14 @@ func RemoveController(w http.ResponseWriter,r * http.Request){
 	}
 
 	if err:=model.RemoveTask(taskid);err!=nil{
-		utils.SendJSONError(w,http.StatusInternalServerError,"error from AddTaskcontroller: "+err.Error())
+		utils.SendJSONError(w,http.StatusInternalServerError,"error from RemoveTaskcontroller: "+err.Error())
 		return
+	}
+
+	if err:=model.RemoveTaskDescription(taskid);err!=nil{
+		utils.SendJSONError(w,http.StatusInternalServerError,"error from RemoveTaskController: "+err.Error())
+		return
+
 	}
 
 	json.NewEncoder(w).Encode(map[string]interface{}{"message":"succesfully done"})

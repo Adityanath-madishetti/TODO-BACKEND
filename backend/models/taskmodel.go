@@ -33,11 +33,13 @@ type Task struct {
 
 
 // user id is given to you in task struct automatically so jsut handel times and id remaining is hoped to be done by controller
-func CreateTask(newtask Task ) error{
+func CreateTask(newtask Task ) (string, error){
 
 	if newtask.Id.IsZero(){
 		newtask.Id=bson.NewObjectID()
 	}
+
+
 
 
 	newtask.TaskId = uuid.New().String()
@@ -49,12 +51,12 @@ func CreateTask(newtask Task ) error{
 	res,err:=db.Taskcollection.InsertOne(context.Background(),newtask)
 
 	if err!=nil{
-		return fmt.Errorf("error from AddTask %w",err)
+		return "",fmt.Errorf("error from AddTask %w",err)
 	}
 
 	fmt.Println("the task is added with insertid ",res.InsertedID)
 
-	return nil
+	return newtask.TaskId,nil
 }
 
 

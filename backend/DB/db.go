@@ -15,6 +15,7 @@ import (
 
 var UserCollection *mongo.Collection
 var Taskcollection *mongo.Collection
+var DescriptionCollection *mongo.Collection
 
 
 func MakeDbConnection()  *mongo.Client{
@@ -42,6 +43,7 @@ conenctionString:=os.Getenv("MONGO_URI")
 	db := client.Database("TodoDatabase")
 	UserCollection=db.Collection("Users")
 	Taskcollection = db.Collection("TodoTasks")
+	DescriptionCollection=db.Collection("Descriptions")
 
 	return client
 
