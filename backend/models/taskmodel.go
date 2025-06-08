@@ -161,10 +161,11 @@ func ChangeCategory(taskID string, newcategory  string) error{
 		"taskId":taskID,
 	}
 
+
 	_, err :=db.Taskcollection.UpdateOne(context.Background(),filter,update)
 	
 		if(err!=nil){
-			return fmt.Errorf("error in updating from changeTitle %w",err)
+			return fmt.Errorf("error in updating from ChangeCategory %w",err)
 
 		}
 
@@ -176,10 +177,11 @@ func ChangeCategory(taskID string, newcategory  string) error{
 
 func ChangePriority(taskID string, newpriority int) error{
 	update:= bson.M{
-		"set":bson.M{
+		"$set":bson.M{
 			"priority":newpriority,
 		},
 	}
+
 
 	filter:=bson.M{
 		"taskId":taskID,
@@ -188,7 +190,7 @@ func ChangePriority(taskID string, newpriority int) error{
 	_, err :=db.Taskcollection.UpdateOne(context.Background(),filter,update)
 
 	if(err!=nil){
-			return fmt.Errorf("error in updating from changeTitle %w",err)
+			return fmt.Errorf("error in updating from changePriority %w",err)
 	}
 
 		return nil
