@@ -2,7 +2,7 @@ package controller
 
 import (
 	"encoding/json"
-	"fmt"
+	// "fmt"
 	"net/http"
 	"strconv"
 
@@ -175,7 +175,7 @@ func GetTaskFromId(w http.ResponseWriter , r *http.Request){
 
 	w.Header().Set("Content-Type", "application/json")
 
-	fmt.Println("endpoint got hit from id task controller")
+	// fmt.Println("endpoint got hit from id task controller")
 	mapc:=mux.Vars(r)
 	taskId:=mapc["id"]
 	
